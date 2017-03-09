@@ -78,7 +78,76 @@ paths:
         404:
           description: Invalid session token
 
-  /{user_email}:
+  /api:
+    post:
+      description: Create a new API session with an automatically generated
+                   key
+      security:
+        - RPosSession: []
+      parameters:
+        - name: permissions
+          in: body
+          required: true
+          description: The base list of permissions for the key
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        201:
+          description: The key was created
+          schema:
+            type: object
+            properties:
+              key:
+                description: The new key
+                type: string
+        401:
+          description: Invalid permissions to create a session key
+
+
+  /api/{apikey}:
+    get:
+      description: Returns the permissions associated with the key
+      parameters:
+        - name: apikey
+          in: path
+          required: true
+          description: The API key to fetch permissions for
+          type: string
+      responses:
+        200:
+          description: The permissions of the key
+          schema:
+            type: object
+            properties:
+              key:
+                type: string
+                description: The session key
+              permissions:
+                type: array
+                items:
+                  type: string
+        404:
+          description: The key was not found
+
+    put:
+      description: Create a new API session
+      security:
+        - RPosSession: []
+      parameters:
+        - name: apikey
+          in: path
+          required: true
+          description: The API key to create
+          type: string
+      responses:
+        201:
+          description: The key was created
+        401:
+          description: Invalid permissions to create a session key
+
+  /user/{user_email}:
     put:
       description: can be used to update a users permissions
       security:

@@ -38,7 +38,7 @@ start(_StartType, _StartArgs) ->
     Dispatch = cowboy_router:compile([
         {'_', [{"/", status_handler, []},
                {"/permissions/:token", permission_handler, []},
-               {"/:user", user_handler, []}]}
+               {"/user/:user", user_handler, []}]}
     ]),
     Port = application:get_env(rpos_auth, port, 8080),
     {ok, _} = cowboy:start_clear(?LISTENER, 100,
