@@ -20,12 +20,11 @@ from_json(Req0, State) ->
     User = cowboy_req:binding(user, Req0),
     {Body, Req1} = read_all_body(Req0),
     JSON = jiffy:decode(Body, [return_maps]),
-    ok = rpos_auth:add_permissions(User, maps:get(author, State),
-                                   lists:map(fun to_tuples/1,
-                                             maps:get(<<"add">>, JSON, []))),
-    RemoveTuples = lists:map(fun to_tuples/1,
-                             maps:get(<<"remove">>, JSON, [])),
-    ok = rpos_auth:remove_permissions(User, RemoveTuples),
+    Author = maps:get(author, State),
+    AddTuples = get_tuples(<<"add">>, JSON),
+    ok = rpos_auth:add_permissions(User, Author, AddTuples),
+    RemoveTuples = get_tuples(<<"remove">>, JSON),
+    ok = rpos_auth:remove_permissions(User, Author, RemoveTuples),
     {true, Req1, State}.
 
 read_all_body(Req) ->
@@ -38,3 +37,6 @@ read_all_body({more, Data, Req}, Acc) ->
                   <<Acc/binary, Data/binary>>).
 
 to_tuples([A, B]) -> {A, B}.
+
+get_tuples(Field, JSON) ->
+    lists:map(fun to_tuples/1, maps:get(Field, JSON, [])).

@@ -3,7 +3,7 @@
 -behaviour(gen_server).
 
 -export([start_link/0, start_link/1]).
--export([get_permissions/2, add_permissions/4, remove_permissions/3]).
+-export([get_permissions/2, add_permissions/4, remove_permissions/4]).
 
 -export([init/1, terminate/2, code_change/3]).
 -export([handle_call/3, handle_cast/2, handle_info/2]).
@@ -21,8 +21,8 @@ get_permissions(Pid, Session) ->
 add_permissions(Pid, User, Author, PermissionSet) ->
     gen_server:call(Pid, {add_permissions, User, Author, PermissionSet}).
 
-remove_permissions(Pid, User, PermissionSet) ->
-    gen_server:call(Pid, {remove_permissions, User, PermissionSet}).
+remove_permissions(Pid, User, Author, PermissionSet) ->
+    gen_server:call(Pid, {remove_permissions, User, Author, PermissionSet}).
 
 init(Args) ->
     ConfigPath = proplists:get_value(config, Args, "config.json"),
@@ -52,9 +52,10 @@ handle_call({add_permissions, User, Author, PermissionSet}, _From, State) ->
     {reply,
      add_user_permissions(State#state.connection, User, Author, PermissionSet),
      State};
-handle_call({remove_permissions, User, PermissionSet}, _From, State) ->
+handle_call({remove_permissions, User, Author, PermissionSet}, _From, State) ->
     {reply,
-     remove_user_permissions(State#state.connection, User, PermissionSet),
+     remove_user_permissions(State#state.connection, User, Author,
+                             PermissionSet),
      State}.
 
 handle_cast({db_connect, Config}, State) ->
@@ -110,6 +111,7 @@ get_user_permissions(Conn, Username) ->
     {ok, _Cols, Rows} = epgsql:equery(Conn, Query, [Username]),
     Rows.
 
+% TODO: allows for multiple inserts of same permission
 add_user_permissions(Conn, Username, Author, PermissionSet) ->
     Query = "INSERT INTO user_permissions(username, created_by, module,
              permission) VALUES ($1, $2, $3, $4)",
@@ -120,11 +122,13 @@ add_user_permissions(Conn, Username, Author, PermissionSet) ->
     lists:foreach(Fn, PermissionSet),
     ok.
 
-remove_user_permissions(Conn, Username, PermissionSet) ->
-    Query = "DELETE FROM user_permissions WHERE username=$1 AND module=$2
-             AND permission=$3",
+remove_user_permissions(Conn, Username, Author, PermissionSet) ->
+    Query = "UPDATE user_permissions
+             SET deleted='t', deleted_by=$1, deleted_on=NOW()
+             WHERE username=$2 AND module=$3 AND permission=$4
+                   AND deleted='f'",
     Fn = fun({Mod, Perm}) ->
-        epgsql:equery(Conn, Query, [Username, Mod, Perm])
+        epgsql:equery(Conn, Query, [Author, Username, Mod, Perm])
     end,
     % TODO: check for errors
     lists:foreach(Fn, PermissionSet),

@@ -8,7 +8,7 @@
 -behaviour(application).
 
 %% Public API
--export([get_permissions/1, add_permissions/3, remove_permissions/2]).
+-export([get_permissions/1, add_permissions/3, remove_permissions/3]).
 
 %% application callbacks
 -export([start/2, stop/1]).
@@ -26,8 +26,8 @@ add_permissions(User, Author, PermissionSet) ->
     rpos_auth_server:add_permissions(server_pid(), User, Author,
                                      PermissionSet).
 
-remove_permissions(User, PermissionSet) ->
-    rpos_auth_server:remove_permissions(server_pid(), User,
+remove_permissions(User, Author, PermissionSet) ->
+    rpos_auth_server:remove_permissions(server_pid(), User, Author,
                                         PermissionSet).
 
 %%====================================================================
