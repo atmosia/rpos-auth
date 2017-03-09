@@ -1,0 +1,14 @@
+{
+    "database": {
+        "host": "localhost",
+        "port": 32784,
+        "user": "rpos",
+        "pass": "rpos",
+        "name": "rpos_auth"
+    },
+
+    "login": {
+        "host": "http://localhost",
+        "port": 8081
+    }
+}

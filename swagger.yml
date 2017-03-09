@@ -1,0 +1,116 @@
+# To view this in a more readable format, copy and paste the entire YAML file
+# in to http://editor.swagger.io
+swagger: '2.0'
+
+info:
+  version: "0.1"
+  title: rPOS Authorization API
+  description: |
+    API for the authorization microservice
+
+host: auth.rpos.net
+basePath: /
+
+schemes: ["https"]
+
+securityDefinitions:
+  RPosSession:
+    type: apiKey
+    name: Authorization
+    in: header
+
+paths:
+  /:
+    get:
+      description: Returns the server version and health check
+      produces:
+        - application/json
+      responses:
+        200:
+          description: The server status
+          schema:
+            type: object
+            properties:
+              version:
+                type: string
+                description: A semver complaint version string
+              health:
+                type: string
+                description: The current state of the server
+                enum: [
+                  "OK",
+                  "WARNING",
+                  "ERROR"
+                ]
+
+  /permisions/{session_token}:
+    get:
+      description: Fetches the permissions associated with the given session
+                   token
+      produces:
+        - application/json
+      parameters:
+        - name: session_token
+          in: path
+          required: true
+          type: string
+          description: The session token to fetch permissions for
+      responses:
+        200:
+          description: The permissions of the user
+
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: The name of the owner of the session token
+              permissions:
+                type: array
+                description: A list of the users permissions
+                items:
+                  type: string
+              session_token:
+                type: string
+                description: The current session token, or a new one if the
+                             previous one expires soon
+
+        404:
+          description: Invalid session token
+
+  /{user_email}:
+    put:
+      description: can be used to update a users permissions
+      security:
+        - RPosSession: []
+      parameters:
+        - name: user_email
+          in: path
+          required: true
+          description: The user to update
+          type: string
+        - name: permission_set
+          in: body
+          required: true
+          description: The updates to make to the permissions
+          schema:
+            type: object
+            properties:
+              add:
+                type: array
+                description: the permissions to add
+                items:
+                  type: string
+              remove:
+                type: array
+                description: the permissions to remove
+                items:
+                  type: string
+      responses:
+        201:
+          description: The user was sucessfully updated
+        401:
+          description: The provided session token lacks the permissions to
+                       update this user
+        404:
+          description: The provided user does not exist

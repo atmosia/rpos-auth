@@ -1,0 +1,16 @@
+version: '2'
+
+volumes:
+    db_data: {}
+
+services:
+    db:
+        image: postgres
+        ports:
+            - "5432"
+        volumes:
+            - db_data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_USER: rpos
+            POSTGRES_PASSWORD: rpos
+            POSTGRES_DB: rpos_auth
