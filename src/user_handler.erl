@@ -22,9 +22,9 @@ from_json(Req0, State) ->
     JSON = jiffy:decode(Body, [return_maps]),
     Author = maps:get(author, State),
     AddTuples = get_tuples(<<"add">>, JSON),
-    ok = rpos_auth:add_permissions(User, Author, AddTuples),
+    ok = rpos_auth:add_user_permissions(User, Author, AddTuples),
     RemoveTuples = get_tuples(<<"remove">>, JSON),
-    ok = rpos_auth:remove_permissions(User, Author, RemoveTuples),
+    ok = rpos_auth:remove_user_permissions(User, Author, RemoveTuples),
     {true, Req1, State}.
 
 read_all_body(Req) ->

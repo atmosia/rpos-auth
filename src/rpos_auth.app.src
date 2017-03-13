@@ -7,7 +7,8 @@
    [kernel,
     stdlib,
     inets,
-    cowboy
+    cowboy,
+    crypto
    ]},
   {env,[]},
   {modules, []},

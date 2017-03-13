@@ -10,7 +10,7 @@ content_types_provided(Req, State) ->
 
 resource_exists(Req, State) ->
     Token = cowboy_req:binding(token, Req),
-    case rpos_auth:get_permissions(Token) of
+    case rpos_auth:get_user_permissions(Token) of
         {ok, Username, Perms, Session} ->
             {true, Req, {Username, Perms, Session}};
         {error, invalid_session_id} -> {false, Req, State}
@@ -18,8 +18,8 @@ resource_exists(Req, State) ->
 
 
 to_json(Req, State = {Username, Perms, Session}) ->
-    JSON = json:encode(#{username => Username,
-                         permisions => Perms,
-                         session_token => Session
-                        }),
+    JSON = jiffy:encode(#{username => Username,
+                          permisions => Perms,
+                          session_token => Session
+                         }),
     {JSON, Req, State}.

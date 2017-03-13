@@ -43,7 +43,7 @@ paths:
                   "ERROR"
                 ]
 
-  /permisions/{session_token}:
+  /session/{session_token}:
     get:
       description: Fetches the permissions associated with the given session
                    token
