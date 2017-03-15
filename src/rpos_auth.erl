@@ -66,7 +66,7 @@ start(_StartType, _StartArgs) ->
                {"/api/:key", api_handler, []}
               ]}
     ]),
-    Port = application:get_env(rpos_auth, port, 8080),
+    Port = application:get_env(rpos_auth, port, 8081),
     {ok, _} = cowboy:start_clear(?LISTENER, 100,
                                  [{port, Port}],
                                  #{env => #{dispatch => Dispatch}}),

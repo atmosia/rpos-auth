@@ -19,7 +19,7 @@ resource_exists(Req, State) ->
 
 to_json(Req, State = {Username, Perms, Session}) ->
     JSON = jiffy:encode(#{username => Username,
-                          permisions => Perms,
+                          permissions => Perms,
                           session_token => Session
                          }),
     {JSON, Req, State}.

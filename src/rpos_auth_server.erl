@@ -146,14 +146,14 @@ get_username(Session, LoginConfig) ->
     if  Code =:= 200 ->
             JSON = jiffy:decode(Body, [return_maps]),
             {ok, maps:get(<<"email">>, JSON),
-             maps:get(<<"session_key">>, JSON)};
+             maps:get(<<"session">>, JSON)};
         Code =:= 404 -> {error, invalid_session_id}
     end.
 
 get_user_permissions_(Conn, Username) ->
     Query = "SELECT module,permission FROM user_permissions WHERE username=$1",
     {ok, _Cols, Rows} = epgsql:equery(Conn, Query, [Username]),
-    Rows.
+    lists:map(fun({X, Y}) -> [X, Y] end, Rows).
 
 % TODO: allows for multiple inserts of same permission
 add_user_permissions_(Conn, Username, Author, PermissionSet) ->
